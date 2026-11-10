@@ -1,0 +1,12 @@
+id: echo-budget
+name: Latency budget
+tags: [budget]
+customer:
+  description: A customer saying hello.
+  strategy: Say "hi". Then say "thanks".
+  max_turns: 2
+criteria:
+  success:
+    - The bot replies to every message
+budgets:
+  turn_latency_p95_ms: 100

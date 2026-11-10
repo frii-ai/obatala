@@ -1,0 +1,13 @@
+# Go-engine configuration for running the conformance cases.
+transport:
+  name: http
+  settings:
+    url: http://127.0.0.1:8090/
+fixtures_manager: none
+customer:
+  provider: openai
+  model: gemma4:31b
+  base_url: https://ollama.com/v1/
+  api_key_env: OLLAMA_API_KEY
+reply_timeout: 10s
+retry_attempts: 3

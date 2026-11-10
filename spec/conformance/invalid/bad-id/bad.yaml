@@ -1,0 +1,6 @@
+id: Not_Kebab
+customer:
+  description: d
+  strategy: s
+criteria:
+  success: [x]

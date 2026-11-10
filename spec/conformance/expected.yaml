@@ -1,0 +1,53 @@
+# Conformance cases (spec_version 1). Each case: which suite to run, how
+# the echo bot behaves (ECHO_MODE), and the structural results required.
+# LLM judgments are only asserted where the criteria leave no room.
+# Every run that writes a report MUST produce JSON that validates against
+# schemas/report.schema.json.
+cases:
+  - name: pass
+    suite: scenarios
+    filter: {id: echo-pass}
+    bot: echo
+    exit: 0
+    outcomes: {echo-pass: pass}
+
+  - name: unmet-success-criterion-is-fail
+    suite: scenarios
+    filter: {id: echo-unmet}
+    bot: echo
+    exit: 1
+    outcomes: {echo-unmet: fail}
+    require: [unmet_criteria non-empty]
+
+  - name: latency-budget-violation-is-fail
+    suite: scenarios
+    filter: {tag: budget}
+    bot: slow
+    exit: 1
+    outcomes: {echo-budget: fail}
+    require: [budget_violations non-empty]
+
+  - name: transport-error-is-error-not-fail
+    suite: scenarios
+    filter: {id: echo-pass}
+    bot: broken
+    exit: 2
+    outcomes: {echo-pass: error}
+    require: [error non-empty, no judge verdict fields]
+
+  - name: silent-bot-is-error
+    suite: scenarios
+    filter: {id: echo-pass}
+    bot: silent
+    exit: 2
+    outcomes: {echo-pass: error}
+
+  - name: invalid-id-rejected-before-run
+    suite: invalid/bad-id
+    exit: 2
+    require: [no scenario contacts the bot]
+
+  - name: duplicate-id-rejected-before-run
+    suite: invalid/duplicate-id
+    exit: 2
+    require: [no scenario contacts the bot]

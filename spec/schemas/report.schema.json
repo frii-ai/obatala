@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/frii-ai/obatala/spec/schemas/report.schema.json",
+  "title": "Obatala JSON report",
+  "description": "reports/report.json, report_version 3. SPEC.md section 9. Durations are integer nanoseconds.",
+  "type": "object",
+  "required": ["report_version", "started_at", "duration_ns", "meta", "latency", "scenarios"],
+  "properties": {
+    "report_version": {"const": 3},
+    "started_at": {"type": "string", "format": "date-time"},
+    "duration_ns": {"type": "integer", "minimum": 0},
+    "meta": {"$ref": "#/$defs/meta"},
+    "latency": {"$ref": "#/$defs/latency"},
+    "scenarios": {"type": "array", "items": {"$ref": "#/$defs/scenario"}}
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": ["environment", "test_mode"],
+      "properties": {
+        "environment": {"type": "string"},
+        "contract_version": {"type": "integer"},
+        "app_version": {"type": "string"},
+        "prompt_version": {"type": "string"},
+        "bot_model": {"type": "string"},
+        "test_mode": {"type": "boolean"},
+        "extra": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "latency": {
+      "type": "object",
+      "required": ["turns", "first_p50_ns", "first_p95_ns", "first_max_ns", "last_p50_ns", "last_p95_ns", "last_max_ns"],
+      "properties": {
+        "turns": {"type": "integer", "minimum": 0},
+        "first_p50_ns": {"type": "integer"},
+        "first_p95_ns": {"type": "integer"},
+        "first_max_ns": {"type": "integer"},
+        "last_p50_ns": {"type": "integer"},
+        "last_p95_ns": {"type": "integer"},
+        "last_max_ns": {"type": "integer"}
+      }
+    },
+    "strings": {"type": "array", "items": {"type": "string"}},
+    "turn": {
+      "description": "One turn's timing.",
+      "type": "object",
+      "required": ["turn", "sent_at", "first_reply_at", "last_reply_at", "reply_count"],
+      "properties": {
+        "turn": {"type": "integer", "minimum": 1},
+        "sent_at": {"type": "string", "format": "date-time"},
+        "first_reply_at": {"type": "string", "format": "date-time"},
+        "last_reply_at": {"type": "string", "format": "date-time"},
+        "reply_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "required": ["id", "outcome", "turns_used", "duration_ns", "latency"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "tags": {"$ref": "#/$defs/strings"},
+        "fixture": {"type": "string"},
+        "group": {"type": "string"},
+        "outcome": {"enum": ["pass", "fail", "error"]},
+        "reasoning": {"type": "string"},
+        "met_criteria": {"$ref": "#/$defs/strings"},
+        "unmet_criteria": {"$ref": "#/$defs/strings"},
+        "triggered_failures": {"$ref": "#/$defs/strings"},
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "passed"],
+            "properties": {"name": {"type": "string"}, "passed": {"type": "boolean"}, "message": {"type": "string"}}
+          }
+        },
+        "budget_violations": {"$ref": "#/$defs/strings"},
+        "error": {"type": "string"},
+        "turns_used": {"type": "integer", "minimum": 0},
+        "duration_ns": {"type": "integer", "minimum": 0},
+        "turns": {"type": "array", "items": {"$ref": "#/$defs/turn"}},
+        "latency": {"$ref": "#/$defs/latency"},
+        "token_usage": {
+          "type": "object",
+          "properties": {"prompt_tokens": {"type": "integer"}, "completion_tokens": {"type": "integer"}}
+        },
+        "transcript": {"$ref": "#/$defs/strings"},
+        "transcript_head": {"$ref": "#/$defs/strings"},
+        "transcript_tail": {"$ref": "#/$defs/strings"}
+      },
+      "allOf": [
+        {"if": {"properties": {"outcome": {"const": "error"}}}, "then": {"required": ["error"]}}
+      ]
+    }
+  }
+}

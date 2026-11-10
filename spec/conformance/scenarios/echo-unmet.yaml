@@ -1,0 +1,10 @@
+id: echo-unmet
+name: Bot never quotes a price
+tags: [conformance]
+customer:
+  description: A customer asking about pricing.
+  strategy: Ask "how much does the pro plan cost". Then say "thanks".
+  max_turns: 2
+criteria:
+  success:
+    - The bot states a price in dollars for the pro plan

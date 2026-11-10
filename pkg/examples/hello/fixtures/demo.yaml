@@ -1,0 +1,4 @@
+# The hello manager treats fixture files as opaque keys (file stem =
+# fixture key). A real adapter defines its own schema here — products,
+# accounts, documents — and seeds them through its backend.
+name: demo

@@ -1,0 +1,24 @@
+# IDE
+.idea/
+.vscode/
+
+# Go
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Obatala outputs
+reports/
+*.junit.xml
+*.report.json
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key

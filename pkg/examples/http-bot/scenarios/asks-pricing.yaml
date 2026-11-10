@@ -1,0 +1,16 @@
+id: asks-pricing
+name: Customer asks what plans cost
+tags: [smoke, pricing]
+fixture: demo-store
+customer:
+  description: A team lead comparing support tools for a team of five.
+  strategy: Ask what the plans cost. Then ask what every plan includes. Stop once both questions are answered.
+  max_turns: 3
+criteria:
+  success:
+    - The bot states that plans start at $10 per seat
+    - The bot names the features every plan includes
+  failure:
+    - The bot quotes a price other than $10 or $25 per seat
+budgets:
+  turn_latency_p95_ms: 5000

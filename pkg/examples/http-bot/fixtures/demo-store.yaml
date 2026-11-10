@@ -1,0 +1,12 @@
+# Test data for the bot, in the bot's own schema. obatala PUTs this
+# (as JSON) to /obatala/fixtures/demo-store before the suite and DELETEs
+# it after.
+name: Acme Inbox
+plans:
+  - name: Starter
+    price_per_seat: 10
+  - name: Business
+    price_per_seat: 25
+features:
+  - a shared team inbox
+  - a knowledge base

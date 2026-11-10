@@ -1,0 +1,15 @@
+id: asks-pricing
+name: Customer asks about pricing
+tags: [smoke]
+fixture: demo
+customer:
+  description: A curious visitor who wants to know what the product costs.
+  strategy: Ask for the price. Once the bot answers, close politely.
+  max_turns: 2
+criteria:
+  success:
+    - The bot shares the starting price
+  failure:
+    - The bot invents features or prices that were not offered
+budgets:
+  max_turns: 3

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obatala run — {{.Started}}</title>
+<script>document.documentElement.classList.add("js");</script>
+<style>
+__OBATALA_CSS__
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="run">
+  <div class="run-title">
+    <h1>Obatala run</h1>
+    <span class="verdict v-{{.VerdictClass}}">{{.VerdictText}}</span>
+  </div>
+  <p class="run-sub">
+    <span class="mono">{{.Started}}</span>
+    <span>{{.Duration}}</span>
+    <span class="mono">report v{{.ReportVersion}}</span>
+  </p>
+  <ul class="meta">
+    <li><b>environment</b> {{.Run.Meta.Environment}}</li>
+    <li><b>app</b> {{.Run.Meta.AppVersion}}</li>
+    <li><b>contract</b> {{.Run.Meta.ContractVersion}}</li>
+    <li><b>prompt</b> <span class="mono">{{.Run.Meta.PromptVersion}}</span></li>
+    <li><b>model</b> <span class="mono">{{.Run.Meta.BotModel}}</span></li>
+    {{if .Run.Meta.TestMode}}<li><b>mode</b> test</li>{{end}}
+    {{range .Extra}}<li><b>{{.K}}</b> {{.V}}</li>{{end}}
+  </ul>
+</header>
+
+{{if .ViolationCount}}<div class="banner">⚠ {{.ViolationCount}} budget violation{{if ne .ViolationCount 1}}s{{end}} — latency or turn budgets were exceeded</div>{{end}}
+
+<section class="summary">
+  <div class="card">
+    <h2>{{len .Run.Scenarios}} scenarios</h2>
+    <p class="tally">
+      <span class="c-pass">{{.Pass}} pass</span>
+      <span class="c-fail">{{.Fail}} fail</span>
+      <span class="c-error">{{.Errs}} error</span>
+    </p>
+  </div>
+  <div class="card">
+    <h2>first reply latency</h2>
+    {{if .LatencyAny}}
+    {{range .LatencyBars}}
+    <div class="bar-row">
+      <span class="bar-label">{{.Label}}</span>
+      <span class="bar-track"><span class="bar-fill" style="width: {{.Pct}}%"></span></span>
+      <span class="bar-val mono">{{.Value}}</span>
+    </div>
+    {{end}}
+    {{else}}<p class="dim">no replies recorded</p>{{end}}
+  </div>
+  <div class="card">
+    <h2>tokens</h2>
+    {{if .Tokens.Any}}
+    <p class="big mono">{{.Tokens.Prompt}}<span class="dim"> prompt</span> · {{.Tokens.Completion}}<span class="dim"> completion</span></p>
+    {{else}}<p class="dim">not reported</p>{{end}}
+  </div>
+  <div class="card">
+    <h2>run duration</h2>
+    <p class="big mono">{{.Duration}}</p>
+  </div>
+</section>
+
+{{if .Groups}}
+<div class="toolbar">
+  <input type="search" id="q" class="q" placeholder="Filter by id or name…" aria-label="Filter scenarios">
+  <span class="chips" id="outcome-chips">
+    <button type="button" class="chip on" data-outcome="all">all</button>
+    <button type="button" class="chip" data-outcome="pass">pass</button>
+    <button type="button" class="chip" data-outcome="fail">fail</button>
+    <button type="button" class="chip" data-outcome="error">error</button>
+  </span>
+  {{if .Tags}}<span class="chips" id="tag-chips">{{range .Tags}}<button type="button" class="chip" data-tag="{{.}}">{{.}}</button>{{end}}</span>{{end}}
+  <label class="sort-label">sort
+    <select id="sort">
+      <option value="run">run order</option>
+      <option value="id">id</option>
+      <option value="outcome">outcome</option>
+      <option value="latency">p95 latency</option>
+      <option value="duration">duration</option>
+      <option value="turns">turns</option>
+    </select>
+  </label>
+  <span id="count" class="dim"></span>
+</div>
+
+<section class="scenarios">
+  {{range .Groups}}
+  <div class="group" data-group="{{.Key}}">
+    {{if not (and (eq (len $.Groups) 1) (eq .Key ""))}}
+    <div class="group-head">
+      <span class="group-title mono">{{.Title}}</span>
+      <span class="group-tally">
+        {{if .Pass}}<span class="c-pass">{{.Pass}} pass</span>{{end}}
+        {{if .Fail}}<span class="c-fail">{{.Fail}} fail</span>{{end}}
+        {{if .Errs}}<span class="c-error">{{.Errs}} error</span>{{end}}
+      </span>
+    </div>
+    {{end}}
+    {{range .Scenarios}}
+  <article class="scenario s-{{.Outcome}}" data-id="{{.ID}}" data-name="{{.Name}}" data-outcome="{{.Outcome}}" data-rank="{{.OutcomeRank}}" data-tags="{{.TagsText}}" data-latency="{{.LatencyNs}}" data-duration="{{.DurationNs}}" data-turns="{{.TurnsUsed}}">
+    <button type="button" class="scenario-head" aria-expanded="true">
+      <span class="badge b-{{.Outcome}}">{{.Outcome}}</span>
+      <span class="sc-id mono">{{.ID}}</span>
+      <span class="sc-name">{{.Name}}</span>
+      <span class="sc-tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</span>
+      <span class="sc-metric" title="turns">{{.TurnsUsed}}t</span>
+      <span class="sc-metric mono" title="duration">{{.DurationText}}</span>
+      <span class="sc-metric mono" title="p95 first reply">{{.P95Text}}</span>
+      <span class="chev" aria-hidden="true">▾</span>
+    </button>
+    <div class="scenario-body">
+      {{if .Notes}}<p class="notes n-{{.NotesKind}}"><b>{{.NotesLabel}}</b> {{.Notes}}</p>{{end}}
+      {{if and .Reasoning (ne .NotesKind "reasoning")}}<p class="notes n-reasoning"><b>judge</b> {{.Reasoning}}</p>{{end}}
+      <div class="body-cols">
+        <div class="col">
+          {{if .MetCriteria}}<h3 class="h-ok">met criteria</h3><ul class="crit ok">{{range .MetCriteria}}<li>{{.}}</li>{{end}}</ul>{{end}}
+          {{if .UnmetCriteria}}<h3 class="h-bad">unmet criteria</h3><ul class="crit bad">{{range .UnmetCriteria}}<li>{{.}}</li>{{end}}</ul>{{end}}
+          {{if .TriggeredFailures}}<h3 class="h-bad">triggered failure{{if ne (len .TriggeredFailures) 1}}s{{end}}</h3><ul class="crit bad">{{range .TriggeredFailures}}<li>{{.}}</li>{{end}}</ul>{{end}}
+          {{if .BudgetViolations}}<h3 class="h-warn">budget violations</h3><ul class="crit warn">{{range .BudgetViolations}}<li>{{.}}</li>{{end}}</ul>{{end}}
+          {{if .Error}}<h3 class="h-bad">error</h3><p class="error-text mono">{{.Error}}</p>{{end}}
+          {{if .Checks}}<h3>checks</h3><ul class="crit">{{range .Checks}}<li class="{{if .Passed}}ok{{else}}bad{{end}}">{{if .Passed}}✓{{else}}✗{{end}} {{.Name}}{{if .Message}} — {{.Message}}{{end}}</li>{{end}}</ul>{{end}}
+          {{if not (or .MetCriteria .UnmetCriteria .TriggeredFailures .BudgetViolations .Error .Checks)}}<p class="dim">no judge detail recorded</p>{{end}}
+        </div>
+        <div class="col">
+          {{if .TurnBars}}
+          <h3>first reply per turn</h3>
+          <div class="turns">
+            {{range .TurnBars}}<div class="turn" title="turn {{.N}} — {{.Value}}"><div class="turn-bar"><div class="turn-fill" style="height: {{.Pct}}%"></div></div><span class="turn-n">{{.N}}</span></div>{{end}}
+          </div>
+          {{end}}
+          <dl class="sc-meta">
+            {{if .Fixture}}<div><dt>fixture</dt><dd class="mono">{{.Fixture}}</dd></div>{{end}}
+            {{if .HasLatency}}<div><dt>first reply</dt><dd class="mono">p50 {{.P50Text}} · p95 {{.P95Text}} · max {{.MaxText}}</dd></div>{{end}}
+            {{if .TokenUsage}}<div><dt>tokens</dt><dd class="mono">{{.TokenUsage.PromptTokens}} prompt · {{.TokenUsage.CompletionTokens}} completion</dd></div>{{end}}
+            <div><dt>turns used</dt><dd>{{.TurnsUsed}}</dd></div>
+          </dl>
+        </div>
+      </div>
+      {{if .TranscriptLines}}
+      <h3>transcript</h3>
+      <pre class="transcript">{{range .TranscriptLines}}{{if .Speaker}}<span class="sp sp-{{.Speaker}}">{{.Speaker}}:</span> {{.Text}}
+{{else}}{{.Text}}
+{{end}}{{end}}</pre>
+      {{end}}
+    </div>
+  </article>
+    {{end}}
+  </div>
+  {{end}}
+</section>
+{{else}}
+<p class="empty">No scenarios in this run.</p>
+{{end}}
+
+<footer>
+  <p class="dim">obatala · report_version {{.ReportVersion}} · run finished {{.Finished}}</p>
+</footer>
+
+</div>
+<script>
+__OBATALA_JS__
+</script>
+</body>
+</html>

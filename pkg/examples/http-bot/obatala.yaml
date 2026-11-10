@@ -1,0 +1,24 @@
+# The bot runs on its own (python3 bot.py); obatala talks to it over HTTP.
+transport:
+  name: http
+  settings:
+    url: http://127.0.0.1:8080/obatala/messages
+
+fixtures_manager: http-control
+fixtures_manager_settings:
+  url: http://127.0.0.1:8080/obatala
+  # headers:
+  #   Authorization: "Bearer ${BOT_CONTROL_TOKEN}"   # if the bot checks a token
+
+bot_description: Support assistant for Acme Inbox, a team inbox SaaS.
+
+# The simulated customer and the judge. Any OpenAI-compatible endpoint
+# works; the key is read from the env var named here (or a .env file).
+customer:
+  provider: openai
+  model: gemma4:31b
+  base_url: https://ollama.com/v1/
+  api_key_env: OLLAMA_API_KEY
+
+concurrency: 2
+reply_timeout: 30s

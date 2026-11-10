@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/frii-ai/obatala/spec/schemas/scenario.schema.json",
+  "title": "Obatala scenario",
+  "description": "One scenario file (YAML). spec_version 1, SPEC.md section 2.",
+  "type": "object",
+  "required": ["id", "customer", "criteria"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"},
+    "name": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "fixture": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,40}$"},
+    "customer": {
+      "type": "object",
+      "required": ["description", "strategy"],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "strategy": {"type": "string", "minLength": 1},
+        "max_turns": {"type": "integer", "minimum": 0},
+        "allow_urls": {"type": "boolean"}
+      }
+    },
+    "criteria": {
+      "type": "object",
+      "required": ["success"],
+      "properties": {
+        "success": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "pattern": "\\S"}
+        },
+        "failure": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_turns": {"type": "integer", "minimum": 0},
+        "turn_latency_p95_ms": {"type": "integer", "minimum": 0}
+      }
+    },
+    "repeat": {"type": "integer", "minimum": 0},
+    "pass_threshold": {"type": "integer", "minimum": 0}
+  },
+  "if": {"properties": {"repeat": {"exclusiveMinimum": 0}}, "required": ["repeat"]},
+  "then": {"required": ["pass_threshold"], "properties": {"pass_threshold": {"exclusiveMinimum": 0}}}
+}

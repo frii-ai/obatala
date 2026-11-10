@@ -1,0 +1,32 @@
+# Live configuration for the hello example: every role is a real AI
+# call — an LLM-powered bot (transport settings below), an LLM customer
+# simulator, and an LLM judge — on Ollama's OpenAI-compatible API.
+# Swap base_url/model/api_key_env for any provider (OpenAI, Anthropic,
+# local endpoints). Requires an API key: export OLLAMA_API_KEY, or put a
+# .env beside this file (see README.md).
+transport:
+  name: hello
+  settings:
+    model: gemma4:31b
+    base_url: https://ollama.com/v1/
+    api_key_env: OLLAMA_API_KEY
+
+fixtures_manager: hello
+
+customer:
+  provider: openai
+  model: gemma4:31b
+  base_url: https://ollama.com/v1/
+  api_key_env: OLLAMA_API_KEY
+
+judge:
+  provider: openai
+  model: gemma4:31b
+  base_url: https://ollama.com/v1/
+  api_key_env: OLLAMA_API_KEY
+
+concurrency: 1
+reply_timeout: 60s
+settle_window: 0s
+retry_attempts: 3
+transcript_turns: 3

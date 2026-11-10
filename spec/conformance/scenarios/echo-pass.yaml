@@ -1,0 +1,10 @@
+id: echo-pass
+name: Bot repeats the customer's message
+tags: [conformance]
+customer:
+  description: A customer checking that the assistant is listening.
+  strategy: Say "hello there". Then say "thanks".
+  max_turns: 2
+criteria:
+  success:
+    - The bot's replies repeat back what the customer said

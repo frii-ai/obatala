@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/frii-ai/obatala/spec/schemas/verdict.schema.json",
+  "title": "finish_test arguments",
+  "description": "Arguments of the judge's finish_test tool call. SPEC.md section 6. Also the tool's parameter schema.",
+  "type": "object",
+  "required": ["verdict", "reasoning", "details"],
+  "additionalProperties": false,
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["success", "failure", "inconclusive"],
+      "description": "The final verdict of the test"
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "Explanation of why this verdict was reached"
+    },
+    "details": {
+      "type": "object",
+      "required": ["met_criteria", "unmet_criteria", "triggered_failures"],
+      "additionalProperties": false,
+      "description": "Detailed information about criteria evaluation",
+      "properties": {
+        "met_criteria": {"type": "array", "items": {"type": "string"}, "description": "List of success criteria that have been met"},
+        "unmet_criteria": {"type": "array", "items": {"type": "string"}, "description": "List of success criteria that have not been met"},
+        "triggered_failures": {"type": "array", "items": {"type": "string"}, "description": "List of failure criteria that have been triggered"}
+      }
+    }
+  }
+}
